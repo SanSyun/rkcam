@@ -317,7 +317,8 @@ void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmahea
 
     //为RGA输出申请一个dmabuf-fd
     int dst_fd = -1;
-    MppBuffer dst_buf = NULL;
+    MppBuffer dst_buf = NULL;   //mpp_buffer_get得到的句柄
+    MppBuffer enc_buf = NULL;   //交给编码器的句柄，整个循环复用
     size_t rga_dst_w = 1920;
     size_t rga_dst_h = 1080;
     size_t rga_dst_size = (size_t)(rga_dst_h * rga_dst_w * 3 / 2);
@@ -327,9 +328,15 @@ void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmahea
         if(dst_fd < 0){
             return;
         }
+
+        //dma-buf fd 只在初始化时导入一次，循环里不再 import
+        if(mpp_init_buffer(dst_fd, &enc_buf, rga_dst_size, MPP_BUFFER_TYPE_DMA_HEAP) != 0){
+            printf("mpp_init_buffer failed\n");
+            close(dst_fd);
+            return;
+        }
     }
     else{
-        MppBuffer dst_buf = NULL;
         MPP_RET mret;
 
         mret = mpp_buffer_get(NULL, &dst_buf, rga_dst_size);
@@ -344,6 +351,9 @@ void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmahea
             mpp_buffer_put(dst_buf);
             return;    
         }
+
+        //mpp_buffer_get返回的已经是MppBuffer，直接复用，无需再次import
+        enc_buf = dst_buf;
     }
 
     //采集-RGA-MPP
@@ -363,7 +373,7 @@ void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmahea
         //V4L2 DQBUF
         if(ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1){
             printf("VIDIOC_DQBUF failed!\n\n");
-            return;
+            break;
         }
 
         //rga resize
@@ -375,26 +385,27 @@ void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmahea
             break;
         }
         
-        //mpp_编码
-        if(use_dmaheap){
-            mpp_encoder_encode_fd(enc, dst_fd, rga_dst_size, MPP_BUFFER_TYPE_DMA_HEAP);
+        //mpp编码：循环里只换buffer，不再每帧import/put
+        if(mpp_encoder_encode(enc, enc_buf) != 0){
+            printf("mpp_encoder_encode failed at frame %d\n", i);
+            ioctl(dev->fd, VIDIOC_QBUF, &buf);
+            break;
         }
-        else{
-            mpp_encoder_encode_fd(enc, dst_fd, rga_dst_size, MPP_BUFFER_TYPE_ION);
-        }
-
 
         if(ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1){
             printf("VIDIOC_QBUF failed!\n\n");
-            return;
+            break;
         }
-
     }
     double elapsed = now_sec() - t0;
 
-    close(dst_fd);
-    if(!use_dmaheap){
-        mpp_buffer_put(dst_buf);
+    //析构：释放导入的MppBuffer，再按分配方式释放底层dma-buf
+    if(use_dmaheap){
+        mpp_buffer_put(enc_buf);
+        close(dst_fd);
+    }
+    else{
+        mpp_buffer_put(dst_buf); //enc_buf与dst_buf是同一个句柄
     }
 
     printf("encode %d frames in %.3f s\n", frame_num, elapsed);

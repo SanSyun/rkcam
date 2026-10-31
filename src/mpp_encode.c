@@ -98,22 +98,41 @@ int mpp_encoder_init(MppEncoder *enc, const char *output, int width, int height,
     return 0;
 }
 
-//零拷贝编码一帧：把V4L2导出的dma-buf fd导入MPP，喂给编码器，取出码流写文件
-int mpp_encoder_encode_fd(MppEncoder *enc, int dmabuf_fd, size_t size, MppBufferType type){
+//初始化mpp buffer：把外部dma-buf fd导入成MppBuffer，调用方负责最终mpp_buffer_put
+int mpp_init_buffer(int dmabuf_fd, MppBuffer *buf, size_t size, MppBufferType type){
+    MPP_RET ret;
     MppBufferInfo info;
-    MppBuffer buf   = NULL;
-    MppFrame  frame = NULL;
-    MPP_RET   ret;
-    int retry = 0;
 
-    //配置外部buffer参数并导入
+    if (!buf || dmabuf_fd < 0 || size == 0) {
+        printf("mpp_init_buffer: invalid argument\n");
+        return -1;
+    }
+
     memset(&info, 0, sizeof(info));
     info.type = type;
     info.fd   = dmabuf_fd;
     info.size = size;
-    ret = mpp_buffer_import(&buf, &info);
-    if (ret != MPP_OK){
+
+    *buf = NULL;
+    ret = mpp_buffer_import(buf, &info);
+    if (ret != MPP_OK || *buf == NULL){
         printf("mpp_buffer_import failed %d\n", ret);
+        *buf = NULL;
+        return -1;
+    }
+
+    return 0;
+}
+
+//零拷贝编码一帧：把已导入的MppBuffer喂给编码器，取出码流写文件
+//注意：buf的引用归调用方所有，本函数不调用mpp_buffer_put
+int mpp_encoder_encode(MppEncoder *enc, MppBuffer buf){
+    MppFrame  frame = NULL;
+    MPP_RET   ret;
+    int retry = 0;
+
+    if (!enc || !buf) {
+        printf("mpp_encoder_encode: invalid argument\n");
         return -1;
     }
 
@@ -130,8 +149,7 @@ int mpp_encoder_encode_fd(MppEncoder *enc, int dmabuf_fd, size_t size, MppBuffer
     if (ret != MPP_OK) {
         printf("encode_put_frame failed %d\n", ret);
         mpp_frame_deinit(&frame);
-        mpp_buffer_put(buf);
-        return -1;
+        return -1;   //buf引用归调用方，不在这里put
     }
 
     //取码流写文件
@@ -154,14 +172,13 @@ int mpp_encoder_encode_fd(MppEncoder *enc, int dmabuf_fd, size_t size, MppBuffer
     }
 
     mpp_frame_deinit(&frame);
-    mpp_buffer_put(buf); //引用计数归零，MppBuffer 销毁，但 dma-buf fd 仍归 V4L2 管
+    //不再mpp_buffer_put：buffer由调用方缓存，并在析构时统一释放
     enc->frame_cnt++;
     return 0;
 }
 
 //收尾：送 EOS 空帧冲刷编码器，取完剩余码流，销毁实例
-void mpp_encoder_deinit(MppEncoder *enc)
-{
+void mpp_encoder_deinit(MppEncoder *enc){
     MppFrame frame = NULL;
     int retry = 0;
 

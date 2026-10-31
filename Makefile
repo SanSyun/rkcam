@@ -3,7 +3,7 @@ SYSROOT := /root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/
 CFLAGS := -g -O0 -Wall -Iinc -I$(SYSROOT)/usr/include/rockchip -I$(SYSROOT)/usr/include/rga
 LDLIBS := -lpthread  -lrockchip_mpp -fsanitize=address -L$(SYSROOT)/usr/lib -lrga
 
-TARGET := rga_mpp
+TARGET := rkCam
 
 SRC_DIR := src
 OBJ_DIR := obj

@@ -26,7 +26,8 @@ typedef struct {
 } MppEncoder;
 
 int  mpp_encoder_init(MppEncoder *enc, const char *output, int width, int height, int fps);
-int mpp_encoder_encode_fd(MppEncoder *enc, int dmabuf_fd, size_t size, MppBufferType type); 
+int mpp_init_buffer(int dmabuf_fd, MppBuffer *buf, size_t size, MppBufferType type);
+int mpp_encoder_encode(MppEncoder *enc, MppBuffer buf); 
 void mpp_encoder_deinit(MppEncoder *enc);                                 
 
 #endif 
