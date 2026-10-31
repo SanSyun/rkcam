@@ -10,8 +10,9 @@ RK3568 平台上的摄像头采集与硬件编码工程：从**自写 IMX415 驱
 
 | 路径 | 说明 |
 | --- | --- |
-| `Makefile` / `src/` / `inc/` | **主线工程**：V4L2 采集 → RGA 缩放 → MPP 编码串成一条链路，`make` 产出 `rga_mpp` |
+| `Makefile` / `src/` / `inc/` | **主线工程**：V4L2 采集 → RGA 缩放 → MPP 编码的三线程流水线，`make` 产出 `rkCam` |
 | `driver/imx415/` | 自写 IMX415 V4L2 子设备驱动（I2C 寄存器读写、三路电源管理、V4L2 subdev 注册），产出 `my_imx415.ko` |
+| `utils/` | 通用组件：字节流环形缓冲区、图像/码流保存函数 |
 | `tests/` | 分阶段测试代码，各模块可独立编译运行：`imx415_capture`（只采集）/ `mpp_encode`（采集+编码）/ `rga_capture`（采集+RGA+编码） |
 | `docs/` | 技术文档：编码性能复盘、RGA 练习题 |
 | `baseline/` | SDK 原始固件与分区/版本报告；`factory/*.img` 体积过大，**不入库** |
@@ -31,7 +32,7 @@ RK3568 平台上的摄像头采集与硬件编码工程：从**自写 IMX415 驱
 
 ```bash
 cd mediaCam
-make                                  # 产出 ./rga_mpp
+make                                  # 产出 ./rkCam
 make clean
 ```
 

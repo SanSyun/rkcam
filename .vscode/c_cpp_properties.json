@@ -8,6 +8,7 @@
             "cppStandard": "gnu++17",
             "includePath": [
                 "${workspaceFolder}/inc",
+                "${workspaceFolder}/utils",
                 "${workspaceFolder}/driver/imx415",
                 "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include",
                 "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include/rga",
@@ -17,6 +18,7 @@
             "browse": {
                 "path": [
                     "${workspaceFolder}/inc",
+                    "${workspaceFolder}/utils",
                     "${workspaceFolder}/src",
                     "${workspaceFolder}/driver/imx415",
                     "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include"

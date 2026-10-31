@@ -54,10 +54,8 @@ void alloc_buf(struct v4l2_dev *dev);
 void queue_buf(struct v4l2_dev *dev);
 void stream_on(struct v4l2_dev *dev);
 void ready_frame(struct v4l2_dev *dev, int skip_frame);
-void save_picture(const char *filename, unsigned char *file_data, unsigned int len, int is_overwrite);
 void stream_off(struct v4l2_dev *dev);
 void set_fps(struct v4l2_dev *dev, unsigned int fps);
-void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmaheap);
 
 
 #endif

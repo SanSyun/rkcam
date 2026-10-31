@@ -20,4 +20,12 @@
 
 int dma_heap_alloc(const char *path, size_t size);
 
+/*
+ * CPU 访问 dma-buf 前后的缓存同步。
+ * write_access=0：CPU 只读（如 RGA 输出）；=1：CPU 写（如 MPP 输入）。
+ * 内核不支持 DMA_BUF_IOCTL_SYNC 时按成功处理，避免在不支持的内核上直接失败。
+ */
+int dma_buf_cpu_begin(int fd, int write_access);
+int dma_buf_cpu_end(int fd, int write_access);
+
 #endif

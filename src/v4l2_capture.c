@@ -1,7 +1,4 @@
-#include "mpp_encode.h"
 #include "v4l2_capture.h"
-#include "u_rga.h"
-#include "u_dma.h"
 
 //关闭设备
 void close_device(struct v4l2_dev *dev){
@@ -251,25 +248,6 @@ void ready_frame(struct v4l2_dev *dev, int skip_frame){
     }
 }
 
-//保存图像
-void save_picture(const char *filename, unsigned char *file_data, unsigned int len, int is_overwrite){
-    FILE *fp;
-    if (is_overwrite)
-        fp = fopen(filename, "wb");
-    else
-        fp = fopen(filename, "ab");
-    if (fp < 0) {
-        printf("Open frame data file failed\n\n");
-        return;
-    }
-    if (fwrite(file_data, 1, len, fp) < len) {
-        printf("Out of memory!\n");
-    }
-    fflush(fp);
-    fclose(fp);
-    printf("Save one frame to %s succeed!\n\n", filename);
-}
-
 //关闭图像帧输出
 void stream_off(struct v4l2_dev *dev){
     enum v4l2_buf_type type;
@@ -301,113 +279,4 @@ void set_fps(struct v4l2_dev *dev, unsigned int fps){
     printf("VIDIOC_SUBDEV_S_FRAME_INTERVAL [%u fps] OK\n", fps);
 set_fps_err:
     return;
-}
-
-static double now_sec(void)
-{
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    return (double)ts.tv_sec + ts.tv_nsec / 1e9;
-}
-
-//采集缩放并编码frame_num帧 
-void encode_frame(struct v4l2_dev *dev, void *enc, int frame_num, int use_dmaheap){
-    int i = 0;
-    double t0 = now_sec();
-
-    //为RGA输出申请一个dmabuf-fd
-    int dst_fd = -1;
-    MppBuffer dst_buf = NULL;   //mpp_buffer_get得到的句柄
-    MppBuffer enc_buf = NULL;   //交给编码器的句柄，整个循环复用
-    size_t rga_dst_w = 1920;
-    size_t rga_dst_h = 1080;
-    size_t rga_dst_size = (size_t)(rga_dst_h * rga_dst_w * 3 / 2);
-
-    if(use_dmaheap){
-        dst_fd = dma_heap_alloc("/dev/dma_heap/cma", rga_dst_size);
-        if(dst_fd < 0){
-            return;
-        }
-
-        //dma-buf fd 只在初始化时导入一次，循环里不再 import
-        if(mpp_init_buffer(dst_fd, &enc_buf, rga_dst_size, MPP_BUFFER_TYPE_DMA_HEAP) != 0){
-            printf("mpp_init_buffer failed\n");
-            close(dst_fd);
-            return;
-        }
-    }
-    else{
-        MPP_RET mret;
-
-        mret = mpp_buffer_get(NULL, &dst_buf, rga_dst_size);
-        if(mret != MPP_OK || dst_buf == NULL){
-            printf("mpp_buffer_get failed: %d\n", mret);
-            return;
-        }
-
-        dst_fd = mpp_buffer_get_fd(dst_buf);
-        if(dst_fd < 0){
-            printf("mpp_buffer_get_fd failed\n");
-            mpp_buffer_put(dst_buf);
-            return;    
-        }
-
-        //mpp_buffer_get返回的已经是MppBuffer，直接复用，无需再次import
-        enc_buf = dst_buf;
-    }
-
-    //采集-RGA-MPP
-    for(i = 0; i < frame_num; i++){
-        struct v4l2_buffer buf;
-        struct v4l2_plane planes[FMT_NUM_PLANES];
-        memset(&buf, 0, sizeof(buf));
-        memset(planes, 0, sizeof(planes));
-        buf.type = dev->buf_type;
-        buf.memory = dev->memory_type;
-
-        if(V4L2_BUF_TYPE_VIDEO_CAPTURE_MPLANE == dev->buf_type){
-            buf.m.planes = planes;
-            buf.length = FMT_NUM_PLANES;
-        }
-
-        //V4L2 DQBUF
-        if(ioctl(dev->fd, VIDIOC_DQBUF, &buf) == -1){
-            printf("VIDIOC_DQBUF failed!\n\n");
-            break;
-        }
-
-        //rga resize
-        if(rga_resize_nv12(dev->buffers[buf.index].fd, dev->width, dev->height, dev->width, 
-            dst_fd, rga_dst_w, rga_dst_h, rga_dst_w
-        ) != 0){
-            printf("rga_resize_nv12 failed at frame %d\n", i);
-            ioctl(dev->fd, VIDIOC_QBUF, &buf);
-            break;
-        }
-        
-        //mpp编码：循环里只换buffer，不再每帧import/put
-        if(mpp_encoder_encode(enc, enc_buf) != 0){
-            printf("mpp_encoder_encode failed at frame %d\n", i);
-            ioctl(dev->fd, VIDIOC_QBUF, &buf);
-            break;
-        }
-
-        if(ioctl(dev->fd, VIDIOC_QBUF, &buf) == -1){
-            printf("VIDIOC_QBUF failed!\n\n");
-            break;
-        }
-    }
-    double elapsed = now_sec() - t0;
-
-    //析构：释放导入的MppBuffer，再按分配方式释放底层dma-buf
-    if(use_dmaheap){
-        mpp_buffer_put(enc_buf);
-        close(dst_fd);
-    }
-    else{
-        mpp_buffer_put(dst_buf); //enc_buf与dst_buf是同一个句柄
-    }
-
-    printf("encode %d frames in %.3f s\n", frame_num, elapsed);
-    printf("fps_ave = %.2f\n", elapsed > 0 ? frame_num / elapsed : 0.0);
 }
