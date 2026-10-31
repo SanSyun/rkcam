@@ -34,7 +34,7 @@ out/
 # ---------- 测试程序的可执行文件（Makefile 产出） ----------
 tests/imx415_capture/v4l2_capture
 tests/mpp_encode/mpp_encode
-tests/rga_capture/rga_mpp
+rga_mpp
 
 # ---------- 采集 / 编码输出素材 ----------
 *.nv12

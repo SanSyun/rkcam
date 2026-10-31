@@ -1,11 +1,29 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "RK3568-aarch64",
+            "compilerPath": "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/bin/aarch64-buildroot-linux-gnu-gcc",
+            "intelliSenseMode": "linux-gcc-arm64",
+            "cStandard": "gnu11",
+            "cppStandard": "gnu++17",
             "includePath": [
-                "${default}",
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/driver/imx415",
+                "${workspaceFolder}/tests/imx415_capture/inc",
+                "${workspaceFolder}/tests/mpp_encode/inc",
+                "${workspaceFolder}/tests/rga_capture/inc",
+                "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include",
+                "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include/rga",
                 "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include/rockchip"
-            ]
+            ],
+            "defines": [],
+            "browse": {
+                "path": [
+                    "${workspaceFolder}",
+                    "/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot/usr/include"
+                ],
+                "limitSymbolsToIncludedHeaders": true
+            }
         }
     ],
     "version": 4
