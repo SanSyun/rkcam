@@ -1,0 +1,53 @@
+===== DATE =====
+2026-07-25T16:46:44,015079430+08:00
+===== PROC PARTITIONS =====
+major minor  #blocks  name
+
+   1        0       4096 ram0
+ 179        0   30310400 mmcblk0
+ 179        1       4096 mmcblk0p1
+ 179        2       4096 mmcblk0p2
+ 179        3      65536 mmcblk0p3
+ 179        4     131072 mmcblk0p4
+ 179        5      32768 mmcblk0p5
+ 179        6    6291456 mmcblk0p6
+ 179        7     131072 mmcblk0p7
+ 179        8   23642080 mmcblk0p8
+===== CMDLINE =====
+storagemedia=emmc androidboot.storagemedia=emmc androidboot.mode=normal  androidboot.verifiedbootstate=orange rw rootwait earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 root=PARTUUID=614e0000-0000
+===== LSBLK =====
+===== BLKID =====
+/dev/mmcblk0p8: LABEL="userdata" UUID="af689f12-accc-4fc3-b140-d933de65caaa" TYPE="ext4" PARTLABEL="userdata"
+/dev/mmcblk0p7: LABEL="oem" UUID="19ef6a35-6ba6-4e6e-bfa7-f148f36e5fae" TYPE="ext4" PARTLABEL="oem"
+/dev/mmcblk0p6: LABEL="rootfs" UUID="ea52eb49-8626-4592-a1ae-fd7b364f3691" TYPE="ext4" PARTLABEL="rootfs"
+/dev/mmcblk0p5: PARTLABEL="backup"
+/dev/mmcblk0p4: PARTLABEL="recovery"
+/dev/mmcblk0p3: PARTLABEL="boot"
+/dev/mmcblk0p2: PARTLABEL="misc"
+/dev/mmcblk0p1: PARTLABEL="uboot"
+===== MOUNT =====
+/dev/mmcblk0p6 on / type ext4 (rw,relatime)
+devtmpfs on /dev type devtmpfs (rw,relatime,size=993768k,nr_inodes=248442,mode=755)
+proc on /proc type proc (rw,relatime)
+tmpfs on /tmp type tmpfs (rw,relatime,size=1004936k,nr_inodes=251234)
+tmpfs on /run type tmpfs (rw,nosuid,nodev,relatime,size=1004936k,nr_inodes=251234,mode=755)
+tmpfs on /var/log type tmpfs (rw,nosuid,nodev,relatime,size=1004936k,nr_inodes=251234,mode=755)
+devpts on /dev/pts type devpts (rw,relatime,gid=5,mode=620,ptmxmode=000)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,noexec,relatime,size=1004936k,nr_inodes=251234)
+sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
+configfs on /sys/kernel/config type configfs (rw,relatime)
+debugfs on /sys/kernel/debug type debugfs (rw,relatime)
+pstore on /sys/fs/pstore type pstore (rw,nosuid,nodev,noexec,relatime)
+/dev/mmcblk0p7 on /oem type ext4 (rw,relatime)
+/dev/mmcblk0p8 on /userdata type ext4 (rw,relatime)
+adb on /dev/usb-ffs/adb type functionfs (rw,relatime)
+===== DF =====
+Filesystem     Type      Size  Used Avail Use% Mounted on
+/dev/root      ext4      5.9G  1.1G  4.6G  20% /
+devtmpfs       devtmpfs  971M  8.0K  971M   1% /dev
+tmpfs          tmpfs     982M  252K  982M   1% /tmp
+tmpfs          tmpfs     982M  316K  982M   1% /run
+tmpfs          tmpfs     982M  112K  982M   1% /var/log
+tmpfs          tmpfs     982M     0  982M   0% /dev/shm
+/dev/mmcblk0p7 ext4      121M   12M  103M  11% /oem
+/dev/mmcblk0p8 ext4       22G  314K   22G   1% /userdata

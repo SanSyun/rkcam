@@ -1,0 +1,325 @@
+========================================
+M0 RK3568 BASELINE REPORT
+========================================
+
+===== DATE =====
+2026-07-25T16:51:43,191142433+08:00
+
+===== KERNEL =====
+Linux ATK-DLRK3568 5.10.160-rkVision-v1 #7 SMP PREEMPT Sat Jul 18 15:03:38 CST 2026 aarch64 GNU/Linux
+Linux version 5.10.160-rkVision-v1 (root@SUNCHEN) (aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621, GNU ld (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 2.36.1.20210621) #7 SMP PREEMPT Sat Jul 18 15:03:38 CST 2026
+
+===== DEVICE TREE MODEL =====
+Alientek ATK-DLRK3568 Board
+
+===== BOOT CMDLINE =====
+storagemedia=emmc androidboot.storagemedia=emmc androidboot.mode=normal  androidboot.verifiedbootstate=orange rw rootwait earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 root=PARTUUID=614e0000-0000
+
+===== OS RELEASE =====
+NAME=Buildroot
+VERSION=-g2a024528-dirty
+ID=buildroot
+VERSION_ID=2021.11
+PRETTY_NAME="Buildroot 2021.11"
+OS="buildroot"
+BUILD_INFO="root@SUNCHEN Sun Jul 19 19:58:11 CST 2026 - rockchip_atk_dlrk3568_defconfig"
+KERNEL="5.10 - rockchip_linux_defconfig"
+
+===== CPU =====
+processor	: 0
+BogoMIPS	: 48.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x2
+CPU part	: 0xd05
+CPU revision	: 0
+
+processor	: 1
+BogoMIPS	: 48.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x2
+CPU part	: 0xd05
+CPU revision	: 0
+
+processor	: 2
+BogoMIPS	: 48.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x2
+CPU part	: 0xd05
+CPU revision	: 0
+
+processor	: 3
+BogoMIPS	: 48.00
+Features	: fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+CPU implementer	: 0x41
+CPU architecture: 8
+CPU variant	: 0x2
+CPU part	: 0xd05
+CPU revision	: 0
+
+Serial		: 4c25fecb2ec8a9af
+
+===== USERSPACE ABI =====
+/bin/busybox: setuid ELF 64-bit LSB shared object, ARM aarch64, version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-aarch64.so.1, for GNU/Linux 3.7.0, stripped
+/bin/sh: symbolic link to bash
+
+===== FILESYSTEM =====
+/dev/mmcblk0p6 on / type ext4 (rw,relatime)
+devtmpfs on /dev type devtmpfs (rw,relatime,size=993768k,nr_inodes=248442,mode=755)
+proc on /proc type proc (rw,relatime)
+tmpfs on /tmp type tmpfs (rw,relatime,size=1004936k,nr_inodes=251234)
+tmpfs on /run type tmpfs (rw,nosuid,nodev,relatime,size=1004936k,nr_inodes=251234,mode=755)
+tmpfs on /var/log type tmpfs (rw,nosuid,nodev,relatime,size=1004936k,nr_inodes=251234,mode=755)
+devpts on /dev/pts type devpts (rw,relatime,gid=5,mode=620,ptmxmode=000)
+tmpfs on /dev/shm type tmpfs (rw,nosuid,nodev,noexec,relatime,size=1004936k,nr_inodes=251234)
+sysfs on /sys type sysfs (rw,nosuid,nodev,noexec,relatime)
+configfs on /sys/kernel/config type configfs (rw,relatime)
+debugfs on /sys/kernel/debug type debugfs (rw,relatime)
+pstore on /sys/fs/pstore type pstore (rw,nosuid,nodev,noexec,relatime)
+/dev/mmcblk0p7 on /oem type ext4 (rw,relatime)
+/dev/mmcblk0p8 on /userdata type ext4 (rw,relatime)
+adb on /dev/usb-ffs/adb type functionfs (rw,relatime)
+Filesystem     Type      Size  Used Avail Use% Mounted on
+/dev/root      ext4      5.9G  1.1G  4.6G  20% /
+devtmpfs       devtmpfs  971M  8.0K  971M   1% /dev
+tmpfs          tmpfs     982M  260K  982M   1% /tmp
+tmpfs          tmpfs     982M  320K  982M   1% /run
+tmpfs          tmpfs     982M  112K  982M   1% /var/log
+tmpfs          tmpfs     982M     0  982M   0% /dev/shm
+/dev/mmcblk0p7 ext4      121M   12M  103M  11% /oem
+/dev/mmcblk0p8 ext4       22G  314K   22G   1% /userdata
+
+===== PARTITIONS =====
+major minor  #blocks  name
+
+   1        0       4096 ram0
+ 179        0   30310400 mmcblk0
+ 179        1       4096 mmcblk0p1
+ 179        2       4096 mmcblk0p2
+ 179        3      65536 mmcblk0p3
+ 179        4     131072 mmcblk0p4
+ 179        5      32768 mmcblk0p5
+ 179        6    6291456 mmcblk0p6
+ 179        7     131072 mmcblk0p7
+ 179        8   23642080 mmcblk0p8
+/dev/mmcblk0p8: LABEL="userdata" UUID="af689f12-accc-4fc3-b140-d933de65caaa" TYPE="ext4" PARTLABEL="userdata"
+/dev/mmcblk0p7: LABEL="oem" UUID="19ef6a35-6ba6-4e6e-bfa7-f148f36e5fae" TYPE="ext4" PARTLABEL="oem"
+/dev/mmcblk0p6: LABEL="rootfs" UUID="ea52eb49-8626-4592-a1ae-fd7b364f3691" TYPE="ext4" PARTLABEL="rootfs"
+/dev/mmcblk0p5: PARTLABEL="backup"
+/dev/mmcblk0p4: PARTLABEL="recovery"
+/dev/mmcblk0p3: PARTLABEL="boot"
+/dev/mmcblk0p2: PARTLABEL="misc"
+/dev/mmcblk0p1: PARTLABEL="uboot"
+
+===== MODULES =====
+kernel release: 5.10.160-rkVision-v1
+hci_uart 40960 1 - Live 0xffffffc001490000 (O)
+8852bs 3862528 0 - Live 0xffffffc0010e0000 (O)
+
+===== MEDIA NODES =====
+crw-rw---- 1 root video 249,  0 Jul 25 16:19 /dev/media0
+crw-rw---- 1 root video  81, 10 Jul 25 16:19 /dev/v4l-subdev0
+crw-rw---- 1 root video  81, 11 Jul 25 16:19 /dev/v4l-subdev1
+crw-rw---- 1 root video  81, 12 Jul 25 16:19 /dev/v4l-subdev2
+crw-rw---- 1 root video  81,  0 Jul 25 16:19 /dev/video0
+crw-rw---- 1 root video  81,  1 Jul 25 16:19 /dev/video1
+crw-rw---- 1 root video  81,  2 Jul 25 16:19 /dev/video2
+crw-rw---- 1 root video  81,  3 Jul 25 16:19 /dev/video3
+crw-rw---- 1 root video  81,  4 Jul 25 16:19 /dev/video4
+crw-rw---- 1 root video  81,  5 Jul 25 16:19 /dev/video5
+crw-rw---- 1 root video  81,  6 Jul 25 16:19 /dev/video6
+crw-rw---- 1 root video  81,  7 Jul 25 16:19 /dev/video7
+crw-rw---- 1 root video  81,  8 Jul 25 16:19 /dev/video8
+crw-rw---- 1 root video  81,  9 Jul 25 16:19 /dev/video9
+lrwxrwxrwx 1 root root        6 Jul 25 16:19 /dev/video-camera0 -> video0
+-rw-r--r-- 1 root root        4 Jul 25 16:19 /dev/video-dec0
+-rw-r--r-- 1 root root        4 Jul 25 16:19 /dev/video-enc0
+
+===== MEDIA TOOLS =====
+media-ctl 1.22.1
+v4l2-ctl 1.22.1
+gst-launch-1.0 version 1.22.2
+GStreamer 1.22.2
+Unknown package origin
+ffmpeg version 4.4.1 Copyright (c) 2000-2021 the FFmpeg developers
+built with gcc 10.4.0 (Buildroot -g2a024528)
+configuration: --enable-cross-compile --cross-prefix=/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/bin/aarch64-buildroot-linux-gnu- --sysroot=/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot --host-cc='/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/bin/ccache /usr/bin/gcc' --arch=aarch64 --target-os=linux --disable-stripping --pkg-config=/root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/bin/pkg-config --disable-static --enable-shared --prefix=/usr --enable-avfilter --disable-version3 --enable-logging --enable-optimizations --disable-extra-warnings --enable-avdevice --enable-avcodec --enable-avformat --enable-network --disable-gray --enable-swscale-alpha --disable-small --enable-dct --enable-fft --enable-mdct --enable-rdft --disable-crystalhd --disable-dxva2 --enable-runtime-cpudetect --disable-hardcoded-tables --disable-mipsdsp --disable-mipsdspr2 --disable-msa --enable-hwaccels --disable-cuda --disable-cuvid --disable-nvenc --disable-avisynth --disable-frei0r --disable-libopencore-amrnb --disable-libopencore-amrwb --disable-libdc1394 --disable-libgsm --disable-libilbc --disable-libvo-amrwbenc --disable-symver --disable-doc --enable-gpl --enable-nonfree --enable-ffmpeg --enable-ffplay --enable-libv4l2 --enable-avresample --enable-ffprobe --disable-libxcb --disable-postproc --enable-swscale --enable-indevs --enable-alsa --enable-outdevs --enable-pthreads --enable-zlib --enable-bzlib --disable-libfdk-aac --disable-libcdio --enable-gnutls --disable-openssl --enable-libdrm --disable-libopenh264 --enable-libvorbis --enable-muxer=ogg --enable-encoder=libvorbis --disable-vaapi --disable-vdpau --disable-mmal --disable-omx --disable-omx-rpi --disable-libopencv --enable-libopus --enable-libvpx --disable-libass --disable-libbluray --disable-libmfx --enable-librtmp --enable-libmp3lame --disable-libmodplug --enable-libspeex --enable-libtheora --disable-iconv --enable-libfreetype --enable-fontconfig --disable-libopenjpeg --enable-libx264 --enable-libx265 --disable-libdav1d --disable-x86asm --disable-mmx --disable-sse --disable-sse2 --disable-sse3 --disable-ssse3 --disable-sse4 --disable-sse42 --disable-avx --disable-avx2 --disable-armv6 --disable-armv6t2 --enable-vfp --enable-neon --disable-altivec --extra-libs=-latomic --enable-pic --cpu=cortex-a55
+libavutil      56. 70.100 / 56. 70.100
+libavcodec     58.134.100 / 58.134.100
+
+===== ROCKCHIP LIBRARIES =====
+
+===== ROCKCHIP PROCESSES =====
+
+===== DMESG VERSION INFORMATION =====
+Linux version 5.10.160-rkVision-v1 (root@SUNCHEN) (aarch64-none-linux-gnu-gcc (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 10.3.1 20210621, GNU ld (GNU Toolchain for the A-profile Architecture 10.3-2021.07 (arm-10.29)) 2.36.1.20210621) #7 SMP PREEMPT Sat Jul 18 15:03:38 CST 2026
+rockchip-gpio fdd60000.gpio0: probed /pinctrl/gpio0@fdd60000
+rockchip-gpio fe740000.gpio1: probed /pinctrl/gpio1@fe740000
+rockchip-gpio fe750000.gpio2: probed /pinctrl/gpio2@fe750000
+rockchip-gpio fe760000.gpio3: probed /pinctrl/gpio3@fe760000
+rockchip-gpio fe770000.gpio4: probed /pinctrl/gpio4@fe770000
+rockchip-pinctrl pinctrl: probed pinctrl
+arm-scmi firmware:scmi: SCMI Protocol v2.0 'rockchip:' Firmware version 0x0
+rockchip-cpuinfo cpuinfo: SoC		: 35683000
+rockchip-cpuinfo cpuinfo: Serial		: 4c25fecb2ec8a9af
+rockchip-thermal fe710000.tsadc: tsadc is probed successfully!
+rockchip-csi2-dphy-hw fe870000.csi2-dphy-hw: csi2 dphy hw probe successfully!
+rockchip-csi2-dphy csi2-dphy0: csi2 dphy0 probe successfully!
+rockchip-snps-pcie3-phy fe8c0000.phy: failed to find rockchip,pipe_grf regmap
+mpp_service mpp-srv: d5eb2c1fe author: alientek 2025-01-03 arm64: dts: rockchip: rk3588-atk-non-mipi: 未连接MIPI屏时默认使能1080p MIPI屏
+mpp_service mpp-srv: probe start
+mpp_vdpu2 fdea0400.vdpu: Adding to iommu group 1
+mpp_vdpu2 fdea0400.vdpu: probe device
+mpp_vdpu2 fdea0400.vdpu: probing finish
+mpp_vepu2 fdee0000.vepu: Adding to iommu group 3
+mpp_vepu2 fdee0000.vepu: probing start
+mpp_vepu2 fdee0000.vepu: probing finish
+mpp-iep2 fdef0000.iep: Adding to iommu group 4
+mpp-iep2 fdef0000.iep: probe device
+mpp-iep2 fdef0000.iep: allocate roi buffer failed
+mpp-iep2 fdef0000.iep: probing finish
+mpp_jpgdec fded0000.jpegd: Adding to iommu group 2
+mpp_jpgdec fded0000.jpegd: probe device
+mpp_jpgdec fded0000.jpegd: probing finish
+mpp_service mpp-srv: probe success
+rockchip-pvtm fde00000.pvtm: pvtm@0 probed
+rockchip-pvtm fde80000.pvtm: pvtm@1 probed
+rockchip-pvtm fde90000.pvtm: pvtm@2 probed
+rockchip-system-monitor rockchip-system-monitor: system monitor probe
+rockchip-vop2 fe040000.vop: Adding to iommu group 8
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp0 assign plane mask: 0x2a, primary plane phy id: 5
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp1 assign plane mask: 0x15, primary plane phy id: 4
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp2 assign plane mask: 0x0, primary plane phy id: -1
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] Cluster1-win0 as cursor plane for vp0
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] Cluster0-win0 as cursor plane for vp1
+rockchip-drm display-subsystem: bound fe040000.vop (ops 0xffffffc0091d97f8)
+dwhdmi-rockchip fe0a0000.hdmi: Detected HDMI TX controller v2.11a with HDCP (DWC HDMI 2.0 TX PHY)
+dwhdmi-rockchip fe0a0000.hdmi: registered DesignWare HDMI I2C bus driver
+dwhdmi-rockchip fe0a0000.hdmi: IRQ index 1 not found
+rockchip-drm display-subsystem: bound fe0a0000.hdmi (ops 0xffffffc0091e8388)
+dw-mipi-dsi-rockchip fe070000.dsi: failed to find panel or bridge: -517
+rockchip-spi fe620000.spi: no high_speed pinctrl state
+rockchip-spi fe620000.spi: probed, poll=0, rsd=0, cs-inactive=0, ready=0
+PPP MPPE Compression module registered
+rockchip-mipi-csi2-hw fdfb0000.mipi-csi2-hw: enter mipi csi2 hw probe!
+rockchip-mipi-csi2-hw fdfb0000.mipi-csi2-hw: probe success, v4l2_dev:mipi-csi2-hw!
+rkisp_hw fdff0000.rkisp: Adding to iommu group 7
+rkisp_hw fdff0000.rkisp: is_thunderboot: 0
+rkisp_hw fdff0000.rkisp: can't request region for resource [mem 0xfdff0000-0xfdffffff]
+rkisp_hw fdff0000.rkisp: max input:0x0@0fps
+rkisp_hw fdff0000.rkisp: no find phandle sram
+rkisp rkisp-vir0: rkisp driver version: v02.03.00
+rkisp rkisp-vir0: No memory-region-thunderboot specified
+rkisp rkisp-vir0: Entity type for entity rkisp-isp-subdev was not initialized!
+rkisp rkisp-vir0: Entity type for entity rkisp-csi-subdev was not initialized!
+dwmmc_rockchip fe000000.dwmmc: No normal pinctrl state
+dwmmc_rockchip fe000000.dwmmc: No idle pinctrl state
+dwmmc_rockchip fe2b0000.dwmmc: No normal pinctrl state
+dwmmc_rockchip fe2b0000.dwmmc: No idle pinctrl state
+dwmmc_rockchip fe000000.dwmmc: IDMAC supports 32-bit address mode.
+dwmmc_rockchip fe000000.dwmmc: Using internal DMA controller.
+dwmmc_rockchip fe2b0000.dwmmc: IDMAC supports 32-bit address mode.
+dwmmc_rockchip fe000000.dwmmc: Version ID is 270a
+dwmmc_rockchip fe2b0000.dwmmc: Using internal DMA controller.
+dwmmc_rockchip fe2b0000.dwmmc: Version ID is 270a
+dwmmc_rockchip fe000000.dwmmc: DW MMC controller at irq 51,32 bit host data width,256 deep fifo
+dwmmc_rockchip fe2b0000.dwmmc: DW MMC controller at irq 62,32 bit host data width,256 deep fifo
+dwmmc_rockchip fe000000.dwmmc: allocated mmc-pwrseq
+rockchip,bus bus-npu: bin=0
+rockchip,bus bus-npu: Failed to get leakage
+rockchip,bus bus-npu: pvtm = 88430, from nvmem
+rockchip,bus bus-npu: pvtm-volt-sel=1
+rockchip,bus bus-npu: avs=0
+rga: rga2, irq = 31, match scheduler
+rga: rga2 hardware loaded successfully, hw_version:3.2.63318.
+rga: rga2 probe successfully
+rga_iommu: IOMMU binding successfully, default mapping core[0x4]
+rga: Module initialized. v1.3.1
+mpp_rkvenc fdf40000.rkvenc: Adding to iommu group 5
+mpp_rkvenc fdf40000.rkvenc: probing start
+mpp_rkvenc fdf40000.rkvenc: bin=0
+mpp_rkvenc fdf40000.rkvenc: Failed to get leakage
+mpp_rkvenc fdf40000.rkvenc: pvtm = 88430, from nvmem
+mpp_rkvenc fdf40000.rkvenc: pvtm-volt-sel=1
+mpp_rkvenc fdf40000.rkvenc: avs=0
+mpp_rkvenc fdf40000.rkvenc: failed to find power_model node
+mpp_rkvenc fdf40000.rkvenc: failed to initialize power model
+mpp_rkvenc fdf40000.rkvenc: failed to get dynamic-coefficient
+mpp_rkvenc fdf40000.rkvenc: probing finish
+mpp_rkvdec2 fdf80200.rkvdec: Adding to iommu group 6
+dwmmc_rockchip fe000000.dwmmc: card claims to support voltages below defined range
+mpp_rkvdec2 fdf80200.rkvdec: rkvdec, probing start
+mpp_rkvdec2 fdf80200.rkvdec: shared_niu_a is not found!
+mpp_rkvdec2 fdf80200.rkvdec: shared_niu_h is not found!
+mpp_rkvdec2 fdf80200.rkvdec: bin=0
+mpp_rkvdec2 fdf80200.rkvdec: leakage=42
+mpp_rkvdec2 fdf80200.rkvdec: leakage-volt-sel=0
+mpp_rkvdec2 fdf80200.rkvdec: pvtm = 88430, from nvmem
+mpp_rkvdec2 fdf80200.rkvdec: pvtm-volt-sel=1
+mpp_rkvdec2 fdf80200.rkvdec: avs=0
+mpp_rkvdec2 fdf80200.rkvdec: failed to find power_model node
+mpp_rkvdec2 fdf80200.rkvdec: failed to initialize power model
+mpp_rkvdec2 fdf80200.rkvdec: failed to get dynamic-coefficient
+mpp_rkvdec2 fdf80200.rkvdec: sram_start 0x00000000fdcc0000
+mpp_rkvdec2 fdf80200.rkvdec: rcb_iova 0x0000000010000000
+mpp_rkvdec2 fdf80200.rkvdec: sram_size 45056
+mpp_rkvdec2 fdf80200.rkvdec: rcb_size 65536
+mpp_rkvdec2 fdf80200.rkvdec: min_width 512
+mpp_rkvdec2 fdf80200.rkvdec: link mode probe finish
+mpp_rkvdec2 fdf80200.rkvdec: probing finish
+rockchip-dmc dmc: bin=0
+rockchip-dmc dmc: leakage=42
+rockchip-dmc dmc: leakage-volt-sel=0
+rockchip-dmc dmc: pvtm = 88430, from nvmem
+rockchip-dmc dmc: pvtm-volt-sel=1
+rockchip-dmc dmc: soc version=0, speed=1
+rockchip-dmc dmc: avs=0
+rockchip-dmc dmc: current ATF version 0x102
+rockchip-dmc dmc: normal_rate = 1560000000
+rockchip-dmc dmc: reboot_rate = 1560000000
+rockchip-dmc dmc: suspend_rate = 324000000
+rockchip-dmc dmc: video_4k_rate = 1560000000
+rockchip-dmc dmc: video_4k_10b_rate = 1560000000
+rockchip-dmc dmc: boost_rate = 1560000000
+rockchip-dmc dmc: fixed_rate(isp|cif0|cif1|dualview) = 1560000000
+rockchip-dmc dmc: performance_rate = 1560000000
+rockchip-dmc dmc: failed to get vop pn to msch rl
+rockchip-dmc dmc: l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0 h_table=0
+rockchip-dmc dmc: could not find power_model node
+rockchip-iodomain fdc20000.syscon:io-domains: pmuio2(3300000 uV) supplied by vcc3v3_pmu
+rockchip-iodomain fdc20000.syscon:io-domains: vccio1(3000000 uV) supplied by vccio_acodec
+rockchip-iodomain fdc20000.syscon:io-domains: vccio3(3300000 uV) supplied by vccio_sd
+rockchip-iodomain fdc20000.syscon:io-domains: vccio4(1800000 uV) supplied by vcc_1v8
+rockchip-iodomain fdc20000.syscon:io-domains: vccio5(3300000 uV) supplied by vcc_3v3
+rockchip-iodomain fdc20000.syscon:io-domains: vccio6(1800000 uV) supplied by vcc_1v8
+rockchip-iodomain fdc20000.syscon:io-domains: vccio7(3300000 uV) supplied by vcc_3v3
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp0 assign plane mask: 0x2a, primary plane phy id: 5
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp1 assign plane mask: 0x15, primary plane phy id: 4
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp2 assign plane mask: 0x0, primary plane phy id: -1
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] Cluster1-win0 as cursor plane for vp0
+rockchip-vop2 fe040000.vop: [drm:vop2_bind] Cluster0-win0 as cursor plane for vp1
+rockchip-drm display-subsystem: bound fe040000.vop (ops 0xffffffc0091d97f8)
+dwhdmi-rockchip fe0a0000.hdmi: Detected HDMI TX controller v2.11a with HDCP (DWC HDMI 2.0 TX PHY)
+dwhdmi-rockchip fe0a0000.hdmi: registered DesignWare HDMI I2C bus driver
+dwhdmi-rockchip fe0a0000.hdmi: IRQ index 1 not found
+rockchip-drm display-subsystem: bound fe0a0000.hdmi (ops 0xffffffc0091e8388)
+rockchip-drm display-subsystem: bound fe070000.dsi (ops 0xffffffc0091e9ce0)
+dwmmc_rockchip fe000000.dwmmc: Successfully tuned phase to 35
+rockchip-drm display-subsystem: route-hdmi: failed to get logo,offset
+rockchip-drm display-subsystem: [drm] fb0: rockchipdrmfb frame buffer device
+[drm] Initialized rockchip 3.0.0 20140818 for display-subsystem on minor 0
+rockchip-pm rockchip-suspend: not set pwm-regulator-config
+rockchip-suspend not set sleep-mode-config for mem-lite
+rockchip-suspend not set wakeup-config for mem-lite
+rockchip-suspend not set sleep-mode-config for mem-ultra
+rockchip-suspend not set wakeup-config for mem-ultra
+rkisp rkisp-vir0: clear unready subdev num: 3
+rkisp-vir0: update sensor failed
+[WLAN_RFKILL]: rockchip_wifi_power: 1
+[WLAN_RFKILL]: rockchip_wifi_power: toggle = false
+[WLAN_RFKILL]: rockchip_wifi_mac_addr: enter.

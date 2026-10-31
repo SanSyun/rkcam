@@ -1,0 +1,63 @@
+# ============================================================
+# mediaCam .gitignore
+# 原则：只跟踪源码 / 头文件 / Makefile / 文档，产物与素材一律不入库
+# ============================================================
+
+# ---------- 通用编译产物 ----------
+*.o
+*.a
+*.so
+*.so.*
+*.ko
+*.mod
+*.mod.c
+*.cmd
+*.d
+*.symvers
+*.order
+Module.symvers
+modules.order
+*.gcda
+*.gcno
+
+# 内核模块中间文件（driver/imx415 下以 . 开头的隐藏文件）
+.my_imx415.*
+.modules.order.cmd
+.Module.symvers.cmd
+
+# 程序目标文件目录
+obj/
+dep/
+build/
+out/
+
+# ---------- 测试程序的可执行文件（Makefile 产出） ----------
+tests/imx415_capture/v4l2_capture
+tests/mpp_encode/mpp_encode
+tests/rga_capture/rga_mpp
+
+# ---------- 采集 / 编码输出素材 ----------
+*.nv12
+*.yuv
+*.raw
+*.h264
+*.h265
+*.mp4
+*.psnr
+*.log
+
+# tmpfile 是本地测试输出目录，仅保留合成视频的脚本
+/tmpfile/*
+!/tmpfile/play_nv12.sh
+
+# ---------- 固件镜像（单文件 >100MB，GitHub 拒收；走 Release 附件或本地留存） ----------
+/baseline/factory/*.img
+/baseline/factory/*.bin
+
+# ---------- 编辑器 / 系统垃圾 ----------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.vscode/settings.json
+compile_commands.json
