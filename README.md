@@ -13,6 +13,7 @@ RK3568 平台上的摄像头采集与硬件编码练手工程：从**自写 IMX4
 | `tests/mpp_encode/` | 采集 + `librockchip_mpp` 硬件 H.264 编码，落盘 `imx415.h264` |
 | `tests/rga_capture/` | 采集 + RGA 4K→1080p 缩放 + MPP 编码（`rga_mpp`），含 DMA heap 零拷贝尝试 |
 | `baseline/` | SDK 原始固件与分区/版本报告；`factory/*.img` 体积过大，**不入库** |
+| `docs/` | 技术文档：编码性能复盘、RGA 练习题 |
 | `tmpfile/` | 本地测试输出目录（原始帧、yuv、mp4 均不入库）；`play_nv12.sh` 把 NV12 序列合成视频 |
 | `.vscode/` | 交叉编译的 IntelliSense 配置（`c_cpp_properties.json`） |
 
@@ -43,10 +44,10 @@ make run                              # 板端执行
 
 > 各 `Makefile` 里的 SDK 路径是作者本机绝对路径，换机器请先改 `KERNELDIR` / `SYSROOT` / `TOOLCHAIN_DIR`。
 
-## 相关文档
+## 技术文档
 
-- [mpp_encode 编码性能问题复盘](tests/mpp_encode/doc/mpp_encode_编码性能问题复盘.md) — 三阶段分段计时定位瓶颈，结论是编码链路达标、14 秒开销来自 `librockchip_mpp` 退出清理
-- [RGA 练习题：4K NV12 → 1080p 零拷贝缩放](tests/rga_capture/doc/RGA练习_4K转1080p.md) — 任务分解 M0~M3、验收清单与常见坑
+- [mpp_encode 编码性能问题复盘](docs/mpp_encode_编码性能问题复盘.md) — 三阶段分段计时定位瓶颈，结论是编码链路达标、14 秒开销来自 `librockchip_mpp` 退出清理
+- [RGA 练习题：4K NV12 → 1080p 零拷贝缩放](docs/RGA练习_4K转1080p.md) — 任务分解 M0~M3、验收清单与常见坑
 
 ## 关于仓库内容
 
