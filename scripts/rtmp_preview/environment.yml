@@ -1,0 +1,8 @@
+name: mediaCam-preview
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pyqt=5.15
+  - py-opencv
+  - font-ttf-noto-cjk

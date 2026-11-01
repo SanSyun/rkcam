@@ -1,7 +1,7 @@
 CC := /root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/bin/aarch64-buildroot-linux-gnu-gcc
 SYSROOT := /root/rk3568/rk3568_linux_sdk/buildroot/output/rockchip_atk_dlrk3568/host/aarch64-buildroot-linux-gnu/sysroot
-CFLAGS := -g -O0 -Wall -Iinc -Iutils -I$(SYSROOT)/usr/include/rockchip -I$(SYSROOT)/usr/include/rga
-LDLIBS := -lpthread -lrockchip_mpp -fsanitize=address -L$(SYSROOT)/usr/lib -lrga
+CFLAGS := -g -O0 -Wall -Iinc -Iutils -I$(SYSROOT)/usr/include -I$(SYSROOT)/usr/include/rockchip -I$(SYSROOT)/usr/include/rga
+LDLIBS := -lpthread -lrockchip_mpp -fsanitize=address -L$(SYSROOT)/usr/lib -lrga -lavformat -lavcodec -lavutil
 
 TARGET := rkCam
 
@@ -33,7 +33,7 @@ $(OBJ_DIR)/%.o: $(UTILS_DIR)/%.c
 -include $(DEPS)
 
 run: $(TARGET)
-	./$(TARGET)
+	./$(TARGET) -r /root/imx415.h264
 
 clean:
 	rm -rf $(TARGET) $(OBJ_DIR) $(DEP_DIR)

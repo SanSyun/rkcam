@@ -55,6 +55,17 @@ rga_mpp
 /baseline/factory/*.img
 /baseline/factory/*.bin
 
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+.venv/
+
+# ---------- RTMP server ----------
+scripts/rtmp_server/bin/
+scripts/rtmp_server/*.log
+scripts/rtmp_server/*.pid
+scripts/rtmp_server/*.tar.gz
+
 # ---------- 编辑器 / 系统垃圾 ----------
 .DS_Store
 Thumbs.db

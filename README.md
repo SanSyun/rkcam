@@ -10,7 +10,7 @@ RK3568 平台上的摄像头采集与硬件编码工程：从**自写 IMX415 驱
 
 | 路径 | 说明 |
 | --- | --- |
-| `Makefile` / `src/` / `inc/` | **主线工程**：V4L2 采集 → RGA 缩放 → MPP 编码的三线程流水线，`make` 产出 `rkCam` |
+| `Makefile` / `src/` / `inc/` | **主线工程**：V4L2 采集 → RGA 缩放 → MPP 编码的三线程流水线，支持 H.264 落盘 / RTMP 推流，`make` 产出 `rkCam` |
 | `driver/imx415/` | 自写 IMX415 V4L2 子设备驱动（I2C 寄存器读写、三路电源管理、V4L2 subdev 注册），产出 `my_imx415.ko` |
 | `utils/` | 通用组件：字节流环形缓冲区、图像/码流保存函数 |
 | `tests/` | 分阶段测试代码，各模块可独立编译运行：`imx415_capture`（只采集）/ `mpp_encode`（采集+编码）/ `rga_capture`（采集+RGA+编码） |
@@ -18,12 +18,13 @@ RK3568 平台上的摄像头采集与硬件编码工程：从**自写 IMX415 驱
 | `baseline/` | SDK 原始固件与分区/版本报告；`factory/*.img` 体积过大，**不入库** |
 | `tmpfile/` | 本地测试输出目录（原始帧、yuv、mp4 均不入库）；`play_nv12.sh` 把 NV12 序列合成视频 |
 | `.vscode/` | IntelliSense 配置（`c_cpp_properties.json`，已指向交叉工具链与 sysroot） |
+| `scripts/` | 工具脚本：`rtmp_server/`（WSL MediaMTX 服务 + Windows 1935 转发）、`rtmp_preview/`（PyQt + OpenCV 预览） |
 
 ## 环境依赖
 
 - 内核源码：`/root/rk3568/rk3568_linux_sdk/kernel`（Makefile 中 `KERNELDIR`，可按需覆盖）
 - 工具链：`aarch64-buildroot-linux-gnu-gcc`（默认在 `/opt/atk-dlrk3568-5_10_sdk-toolchain/bin`）
-- 板端库：`librockchip_mpp`、`librga`，以及 `/dev/dma_heap/system`
+- 板端库：`librockchip_mpp`、`librga`、FFmpeg 4.4.1（`libavformat` / `libavcodec` / `libavutil`，RTMP 推流用），以及 `/dev/dma_heap/system`
 - 调试依赖：ASan（`tests/*` 的 Makefile 默认带 `-fsanitize=address`，发布时请去掉）
 
 ## 编译
@@ -35,6 +36,17 @@ cd mediaCam
 make                                  # 产出 ./rkCam
 make clean
 ```
+
+## 运行
+
+主线程序是常驻进程，收到 `SIGINT`（Ctrl-C）或 `SIGTERM` 后优雅退出；`-o` 与 `-r` 二选一：
+
+```bash
+./rkCam -r /root/imx415.h264                      # H.264 落盘
+./rkCam -o rtmp://192.168.1.100:1935/live/imx415  # RTMP 推流
+```
+
+推流模式默认不落盘，避免长时间运行写满磁盘。
 
 分阶段测试：
 
@@ -59,6 +71,8 @@ make clean
 - [mpp_encode 编码性能问题复盘](docs/mpp_encode_编码性能问题复盘.md) — 三阶段分段计时定位瓶颈，结论是编码链路达标、14 秒开销来自 `librockchip_mpp` 退出清理
 - [RGA 练习题：4K NV12 → 1080p 零拷贝缩放](docs/RGA练习_4K转1080p.md) — 任务分解 M0~M3、验收清单与常见坑
 - [三线程采集/编码/消费流水线改造](docs/三线程采集编码消费流水线改造.md) — 双环形缓冲区、三线程职责、记录协议、停机与验证
+- [DMA 缓存一致性问题与 dma-buf 显式同步](docs/DMA缓存一致性_dmabuf同步.md) — 三类失败模式、四条解决路线、`DMA_BUF_IOCTL_SYNC` 方向语义、现有隐患与零拷贝方向
+- [RTMP 推流与 WSL 预览环境](docs/RTMP推流与WSL预览环境.md) — 板端 rkCam 推流、MediaMTX/WSL 服务、Windows 1935 端口转发、PyQt 预览与 conda 隔离环境
 
 ## 关于仓库内容
 

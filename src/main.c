@@ -35,6 +35,16 @@ static void on_signal(int sig)
     g_pipeline_stop = 1;
 }
 
+static void usage(const char *prog)
+{
+    fprintf(stderr,
+            "usage:\n"
+            "  %s -o <rtmp_url>        push H.264 to RTMP\n"
+            "  %s -r <output.h264>     record H.264 to file\n"
+            "exactly one of -o/-r is required; run until SIGINT/SIGTERM\n",
+            prog, prog);
+}
+
 int main(int argc, char *argv[])
 {
     struct v4l2_dev *camdev = &imx415;
@@ -42,6 +52,8 @@ int main(int argc, char *argv[])
     pthread_t tid_cap;
     pthread_t tid_enc;
     pthread_t tid_con;
+    const char *rtmp_url = NULL;
+    const char *record_path = NULL;
     int cap_started = 0;
     int enc_started = 0;
     int con_started = 0;
@@ -50,17 +62,43 @@ int main(int argc, char *argv[])
     int enc_ok = 0;
     int stream_ok = 0;
     int fps = 30;
-    int seconds;
+    int opt;
     int n;
 
-    if (argc < 2) {
-        fprintf(stderr, "usage: %s <seconds> [output.h264]\n", argv[0]);
-        return 1;
+    while ((opt = getopt(argc, argv, "o:r:h")) != -1) {
+        switch (opt) {
+        case 'o':
+            rtmp_url = optarg;
+            break;
+        case 'r':
+            record_path = optarg;
+            break;
+        case 'h':
+            usage(argv[0]);
+            return 0;
+        default:
+            usage(argv[0]);
+            return 1;
+        }
     }
 
-    seconds = atoi(argv[1]);
-    if (seconds <= 0) {
-        fprintf(stderr, "invalid seconds: %s\n", argv[1]);
+    if (optind < argc) {
+        fprintf(stderr, "unexpected argument: %s\n", argv[optind]);
+        usage(argv[0]);
+        return 1;
+    }
+    if ((rtmp_url == NULL) == (record_path == NULL)) {
+        fprintf(stderr,
+                "exactly one of -o <rtmp_url> or -r <output.h264> is required\n");
+        usage(argv[0]);
+        return 1;
+    }
+    if (rtmp_url != NULL && rtmp_url[0] == '\0') {
+        fprintf(stderr, "empty rtmp url\n");
+        return 1;
+    }
+    if (record_path != NULL && record_path[0] == '\0') {
+        fprintf(stderr, "empty output path\n");
         return 1;
     }
 
@@ -69,22 +107,24 @@ int main(int argc, char *argv[])
     p.width = ENC_WIDTH;
     p.height = ENC_HEIGHT;
     p.fps = fps;
-    p.frame_num = fps * seconds;
 
-    if (argc >= 3) {
-        n = snprintf(p.output_path, sizeof(p.output_path), "%s", argv[2]);
+    if (record_path != NULL) {
+        n = snprintf(p.output_path, sizeof(p.output_path), "%s", record_path);
+        if (n < 0 || (size_t)n >= sizeof(p.output_path)) {
+            fprintf(stderr, "output path too long\n");
+            return 1;
+        }
     } else {
-        n = snprintf(p.output_path, sizeof(p.output_path), "%s", "/root/imx415.h264");
-    }
-    if (n < 0 || (size_t)n >= sizeof(p.output_path)) {
-        fprintf(stderr, "output path too long\n");
-        return 1;
+        p.output_path[0] = '\0';   /* 推流模式不落盘 */
     }
 
     signal(SIGINT, on_signal);
     signal(SIGTERM, on_signal);
 
-    printf("fps=%d frame_num=%d output=%s\n", fps, p.frame_num, p.output_path);
+    printf("fps=%d output=%s rtmp=%s (run until SIGINT/SIGTERM)\n",
+           fps,
+           (p.output_path[0] != '\0') ? p.output_path : "(disabled)",
+           (rtmp_url != NULL) ? rtmp_url : "(disabled)");
 
     open_device(camdev);
     get_capabilities(camdev);
@@ -115,6 +155,15 @@ int main(int argc, char *argv[])
         goto cleanup;
     }
     enc_ok = 1;
+
+    //推流模式：编码器已拿到 SPS/PPS，交给 FFmpeg 生成 avcC
+    if (rtmp_url != NULL) {
+        if (u_ffmpeg_init(&p.ff, rtmp_url, ENC_WIDTH, ENC_HEIGHT, fps,
+                          p.enc.header, p.enc.header_len) != 0) {
+            fprintf(stderr, "u_ffmpeg_init failed\n");
+            goto cleanup;
+        }
+    }
 
     //申请两个mppbuffer
     if (mpp_buffer_get(NULL, &p.rga_buf, ENC_FRAME_SIZE) != MPP_OK ||
@@ -148,7 +197,7 @@ int main(int argc, char *argv[])
     }
     con_started = 1;
 
-    /* capture 到目标帧数/收到信号后结束；encode/consume 依次排空 */
+    /* 常驻运行：收到 SIGINT/SIGTERM 后 capture 停，encode/consume 依次排空 */
     pthread_join(tid_cap, NULL);
     cap_started = 0;
     pthread_join(tid_enc, NULL);
@@ -174,6 +223,11 @@ cleanup:
         }
     }
 
+    /* 所有线程已退出，安全关闭 RTMP 并写 trailer */
+    if (p.ff.configured) {
+        u_ffmpeg_deinit(&p.ff);
+    }
+
     if (p.enc_buf != NULL) {
         mpp_buffer_put(p.enc_buf);
         p.enc_buf = NULL;
@@ -196,8 +250,10 @@ cleanup:
     }
     close_device(camdev);
 
-    printf("pipeline done: captured=%llu encoded=%llu packets=%llu bytes=%llu fatal=%d\n",
-           p.captured, p.encoded, p.saved_packets, p.saved_bytes, p.fatal);
+    printf("pipeline done: captured=%llu encoded=%llu file_packets=%llu "
+           "file_bytes=%llu rtmp_sent=%llu rtmp_dropped=%llu fatal=%d\n",
+           p.captured, p.encoded, p.saved_packets, p.saved_bytes,
+           p.ff.frames, p.ff.dropped, p.fatal);
     fflush(stdout);
 
     _exit(0);

@@ -35,7 +35,7 @@ int mpp_encoder_init(MppEncoder *enc, int width, int height, int fps)
     mpp_enc_cfg_set_s32(enc->cfg, "prep:format",      MPP_FMT_YUV420SP);
 
     mpp_enc_cfg_set_s32(enc->cfg, "rc:mode",           MPP_ENC_RC_MODE_CBR); // 固定码率模式
-    mpp_enc_cfg_set_s32(enc->cfg, "rc:bps_target",     20 * 1000 * 1000);
+    mpp_enc_cfg_set_s32(enc->cfg, "rc:bps_target",     8 * 1000 * 1000);
     mpp_enc_cfg_set_s32(enc->cfg, "rc:fps_in_flex",    0); // 输入帧率固定
     mpp_enc_cfg_set_s32(enc->cfg, "rc:fps_in_num",     rc_fps); // 帧率分子
     mpp_enc_cfg_set_s32(enc->cfg, "rc:fps_in_denorm",  1); // 帧率分母

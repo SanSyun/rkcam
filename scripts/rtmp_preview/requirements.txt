@@ -1,0 +1,2 @@
+PyQt6>=6.4
+opencv-python>=4.5

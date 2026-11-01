@@ -1,0 +1,20 @@
+# MediaMTX 最小配置：只启用 RTMP，监听 1935。
+# 板端推流 -> Windows 端口转发 -> WSL 本进程；WSL 预览从 127.0.0.1 拉流。
+logLevel: info
+logDestinations: [stdout]
+
+api: false
+metrics: false
+pprof: false
+playback: false
+
+rtsp: false
+rtmp: true
+rtmpAddress: :1935
+hls: false
+webrtc: false
+srt: false
+moq: false
+
+paths:
+  all_others:

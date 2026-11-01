@@ -31,8 +31,7 @@ void *thread_capture(void *arg)
         return NULL;
     }
 
-    while (!g_pipeline_stop && !p->fatal &&
-           p->captured < (unsigned long long)p->frame_num) {
+    while (!g_pipeline_stop && !p->fatal) {
         struct v4l2_buffer buf;
         struct v4l2_plane planes[FMT_NUM_PLANES];
         struct pollfd pfd;

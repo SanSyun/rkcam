@@ -7,6 +7,7 @@
 
 #include "v4l2_capture.h"
 #include "mpp_encode.h"
+#include "u_ffmpeg.h"
 #include "ringbuffer.h"
 
 /* 编码分辨率：RGA 输出 / MPP 输入 */
@@ -65,8 +66,9 @@ typedef struct {
     int width;
     int height;
     int fps;
-    int frame_num;        /* 目标采集帧数 */
-    char output_path[PIPELINE_OUTPUT_PATH_MAX];
+    char output_path[PIPELINE_OUTPUT_PATH_MAX];  /* 空串表示只推流、不落盘 */
+
+    u_ffmpeg_t ff;        /* RTMP 推流上下文，落盘模式下全 0 */
 
     volatile int capture_done;
     volatile int encode_done;
