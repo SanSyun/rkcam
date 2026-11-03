@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <signal.h>
 
+#include "pipeline_stats.h"
+
 #include "v4l2_capture.h"
 #include "mpp_encode.h"
 #include "u_ffmpeg.h"
@@ -78,6 +80,8 @@ typedef struct {
     unsigned long long encoded;
     unsigned long long saved_packets;
     unsigned long long saved_bytes;
+
+    pipeline_stats_t stats;              /* 1 Hz 运行统计（帧率/延迟） */
 } pipeline_t;
 
 /* 信号处理函数里只能置这个标志，不能调用 pthread/rb_stop */
@@ -96,5 +100,8 @@ int pipeline_write_packet(pipeline_t *p, const void *data, size_t len,
                           uint64_t pts_us, uint32_t seq, uint32_t flags, int timeout_ms);
 int pipeline_read_packet(pipeline_t *p, void *dst, size_t cap, size_t *out_len,
                          uint64_t *pts_us, uint32_t *seq, uint32_t *flags, int timeout_ms);
+
+/* 累计计数快照，供 pipeline_stats_tick/summary 使用 */
+void pipeline_collect_stats(pipeline_t *p, pipeline_stats_counters_t *c);
 
 #endif

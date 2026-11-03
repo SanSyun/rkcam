@@ -24,7 +24,7 @@ import time
 
 # ---------- Qt 兼容层：优先 PyQt6，其次 PyQt5 ----------
 try:
-    from PyQt6.QtCore import QRect, Qt, QThread, pyqtSignal
+    from PyQt6.QtCore import QRect, QTimer, Qt, QThread, pyqtSignal
     from PyQt6.QtGui import QImage, QPainter
     from PyQt6.QtWidgets import (
         QApplication,
@@ -42,7 +42,7 @@ try:
     _QT6 = True
 except ImportError:
     try:
-        from PyQt5.QtCore import QRect, Qt, QThread, pyqtSignal
+        from PyQt5.QtCore import QRect, QTimer, Qt, QThread, pyqtSignal
         from PyQt5.QtGui import QImage, QPainter
         from PyQt5.QtWidgets import (
             QApplication,
@@ -104,6 +104,7 @@ class PreviewThread(QThread):
     """后台解码线程：ffmpeg/OpenCV 的阻塞读不能放在 GUI 线程。"""
 
     frame_ready = pyqtSignal(QImage)
+    fps_changed = pyqtSignal(float)
     status_changed = pyqtSignal(str)
     failed = pyqtSignal(str)
 
@@ -111,6 +112,8 @@ class PreviewThread(QThread):
         super().__init__(parent)
         self.source = source
         self._stop = False
+        self._dec_window = time.monotonic()
+        self._dec_count = 0
 
     def stop(self):
         self._stop = True
@@ -158,6 +161,16 @@ class PreviewThread(QThread):
         while not self._stop and time.monotonic() < end:
             time.sleep(0.1)
 
+    def _count_decoded(self):
+        """每秒统计一次解码 fps，通过信号交给 GUI 线程。"""
+        self._dec_count += 1
+        now = time.monotonic()
+        elapsed = now - self._dec_window
+        if elapsed >= 1.0:
+            self.fps_changed.emit(self._dec_count / elapsed)
+            self._dec_count = 0
+            self._dec_window = now
+
     def _emit_frame(self, frame):
         h, w = frame.shape[:2]
         if w > PREVIEW_WIDTH:
@@ -170,6 +183,8 @@ class PreviewThread(QThread):
         self.frame_ready.emit(image)
 
     def _preview_loop(self, cap, stream):
+        self._dec_window = time.monotonic()
+        self._dec_count = 0
         fps = 0.0
         if not stream:
             fps = cap.get(cv2.CAP_PROP_FPS)
@@ -189,6 +204,7 @@ class PreviewThread(QThread):
             if not ok:
                 return
             self._emit_frame(frame)
+            self._count_decoded()
             if fps > 0:
                 delay = (1.0 / fps) - (time.monotonic() - started)
                 if delay > 0:
@@ -215,6 +231,7 @@ class PreviewThread(QThread):
 
             self._preview_loop(cap, stream)
             cap.release()
+            self.fps_changed.emit(0.0)
 
             if self._stop:
                 break
@@ -236,6 +253,7 @@ class VideoLabel(QWidget):
         super().__init__(parent)
         self._image = None
         self._message = "未开始预览"
+        self._painted = 0
         self.setMinimumSize(640, 360)
         self.setSizePolicy(_EXPANDING, _EXPANDING)
 
@@ -249,6 +267,12 @@ class VideoLabel(QWidget):
         self._message = message
         self.update()
 
+    def take_painted(self):
+        """返回自上次调用以来实际绘制的帧数（显示 fps 用）。"""
+        n = self._painted
+        self._painted = 0
+        return n
+
     def paintEvent(self, event):
         painter = QPainter(self)
         painter.fillRect(self.rect(), _BLACK)
@@ -260,6 +284,7 @@ class VideoLabel(QWidget):
             painter.setRenderHint(_SMOOTH_PIXMAP, True)
             painter.drawImage(QRect(x, y, target.width(), target.height()),
                               self._image)
+            self._painted += 1
             return
 
         if self._message:
@@ -271,8 +296,15 @@ class PreviewWindow(QWidget):
     def __init__(self, source):
         super().__init__()
         self.thread = None
+        self._dec_fps = 0.0
+        self._disp_fps = 0.0
+        self._disp_window = time.monotonic()
+        self._status_text = "就绪"
         self._build_ui(source)
         self._apply_style()
+        self._fps_timer = QTimer(self)
+        self._fps_timer.setInterval(1000)
+        self._fps_timer.timeout.connect(self._tick_fps)
 
     def _build_ui(self, source):
         self.setWindowTitle("RK3568 摄像头预览")
@@ -368,7 +400,8 @@ class PreviewWindow(QWidget):
 
         source = self.source_edit.text().strip()
         if not source:
-            self.status.showMessage("请输入 RTMP 地址或选择本地文件")
+            self._status_text = "请输入 RTMP 地址或选择本地文件"
+            self._compose_status()
             return
         if cv2 is None:
             QMessageBox.critical(
@@ -384,10 +417,16 @@ class PreviewWindow(QWidget):
         self.stop_btn.setEnabled(True)
         self.source_edit.setEnabled(False)
         self.open_btn.setEnabled(False)
-        self.status.showMessage("正在连接 %s …" % source)
+        self._status_text = "正在连接…"
+        self._dec_fps = 0.0
+        self._disp_fps = 0.0
+        self._disp_window = time.monotonic()
+        self.video.take_painted()
+        self._compose_status()
 
         self.thread = PreviewThread(source, self)
         self.thread.frame_ready.connect(self.on_frame)
+        self.thread.fps_changed.connect(self.on_fps)
         self.thread.status_changed.connect(self.on_status)
         self.thread.failed.connect(self.on_error)
         self.thread.finished.connect(self.on_thread_finished)
@@ -396,21 +435,61 @@ class PreviewWindow(QWidget):
     def stop_preview(self):
         if self.thread is None:
             return
-        self.status.showMessage("正在停止…")
+        self._status_text = "正在停止…"
+        self._compose_status()
         self.stop_btn.setEnabled(False)
         self.thread.stop()
 
     def on_frame(self, image):
+        # 等第一帧真正到了再开始算 fps，避免开头打印 0.0
+        if not self._fps_timer.isActive():
+            self._disp_window = time.monotonic()
+            self.video.take_painted()
+            self._fps_timer.start()
         self.video.set_image(image)
 
+    def on_fps(self, fps):
+        self._dec_fps = fps
+        self._compose_status()
+
+    def _compose_status(self):
+        parts = []
+        if self._status_text:
+            parts.append(self._status_text)
+        if self.thread is not None:
+            parts.append("解码 %.1ffps" % self._dec_fps)
+            parts.append("显示 %.1ffps" % self._disp_fps)
+        self.status.showMessage("  ".join(parts))
+
+    def _tick_fps(self):
+        """每秒一次：统计显示 fps，刷新状态栏并打印一行。"""
+        if self.thread is None:
+            return
+
+        now = time.monotonic()
+        elapsed = now - self._disp_window
+        painted = self.video.take_painted()
+        self._disp_fps = (painted / elapsed) if elapsed > 0 else 0.0
+        self._disp_window = now
+
+        self._compose_status()
+        print("[preview] decode=%.1ffps display=%.1ffps"
+              % (self._dec_fps, self._disp_fps), flush=True)
+
     def on_status(self, message):
-        self.status.showMessage(message)
+        self._status_text = message
+        self._compose_status()
 
     def on_error(self, message):
-        self.status.showMessage(message.replace("\n", " "))
+        self._status_text = message.replace("\n", " ")
+        self._compose_status()
         self.video.set_message("预览失败\n" + message)
 
     def on_thread_finished(self):
+        self._fps_timer.stop()
+        self._dec_fps = 0.0
+        self._disp_fps = 0.0
+        self.video.take_painted()
         self.start_btn.setEnabled(True)
         self.stop_btn.setEnabled(False)
         self.source_edit.setEnabled(True)
@@ -418,6 +497,7 @@ class PreviewWindow(QWidget):
         if self.thread is not None:
             self.thread.deleteLater()
             self.thread = None
+        self._compose_status()
 
     def closeEvent(self, event):
         if self.thread is not None:

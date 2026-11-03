@@ -2,6 +2,8 @@
 
 在 WSL 里运行 MediaMTX，接收板端 `rkCam` 推流，并给 WSL 预览脚本拉流。
 
+推流实现与背景知识见 [../../docs/RTMP推流实现.md](../../docs/RTMP推流实现.md)。
+
 ## 数据流
 
 ```text

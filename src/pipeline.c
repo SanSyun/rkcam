@@ -150,3 +150,30 @@ int pipeline_read_packet(pipeline_t *p, void *dst, size_t cap, size_t *out_len,
 
     return 1;
 }
+void pipeline_collect_stats(pipeline_t *p, pipeline_stats_counters_t *c)
+{
+    if (p == NULL || c == NULL) {
+        return;
+    }
+
+    memset(c, 0, sizeof(*c));
+
+    c->captured = p->captured;
+    c->encoded = p->encoded;
+    c->saved_packets = p->saved_packets;
+    c->saved_bytes = p->saved_bytes;
+    c->sent = p->ff.frames;
+    c->dropped = p->ff.dropped;
+    c->sent_bytes = p->ff.bytes;
+    c->file_on = (p->output_path[0] != '\0');
+    c->rtmp_on = p->ff.configured;
+
+    if (p->frame_rb.size > 0) {
+        c->frame_ring_pct = (unsigned int)(rb_used(&p->frame_rb) * 100
+                                           / p->frame_rb.size);
+    }
+    if (p->packet_rb.size > 0) {
+        c->packet_ring_pct = (unsigned int)(rb_used(&p->packet_rb) * 100
+                                            / p->packet_rb.size);
+    }
+}

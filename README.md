@@ -39,14 +39,19 @@ make clean
 
 ## 运行
 
-主线程序是常驻进程，收到 `SIGINT`（Ctrl-C）或 `SIGTERM` 后优雅退出；`-o` 与 `-r` 二选一：
+主线程序是常驻进程，收到 `SIGINT`（Ctrl-C）或 `SIGTERM` 后优雅退出；`-o` / `-r` 可单独用，也可用 `-or` 同时推流和落盘：
 
 ```bash
 ./rkCam -r /root/imx415.h264                      # H.264 落盘
 ./rkCam -o rtmp://192.168.1.100:1935/live/imx415  # RTMP 推流
+./rkCam -or rtmp://192.168.1.100:1935/live/imx415 /root/imx415.h264  # 边推边录
 ```
 
-推流模式默认不落盘，避免长时间运行写满磁盘。
+`-o` 默认不落盘，避免长时间运行写满磁盘；`-or` 会持续写盘（1080p30 约 2~4 GB/小时），长时间运行注意 `df`。
+`-or` 下落盘失败只关闭文件、继续推流，不影响预览。
+
+运行期默认每秒在 stderr 打印一行 `[stats]`（采集/编码/发送/落盘帧率、环形缓冲占用、采集→发送延迟分位数），
+退出时打印 p50/p95/p99/max 汇总，详见 [帧率与延迟统计](docs/帧率与延迟统计.md)。
 
 分阶段测试：
 
@@ -72,7 +77,9 @@ make clean
 - [RGA 练习题：4K NV12 → 1080p 零拷贝缩放](docs/RGA练习_4K转1080p.md) — 任务分解 M0~M3、验收清单与常见坑
 - [三线程采集/编码/消费流水线改造](docs/三线程采集编码消费流水线改造.md) — 双环形缓冲区、三线程职责、记录协议、停机与验证
 - [DMA 缓存一致性问题与 dma-buf 显式同步](docs/DMA缓存一致性_dmabuf同步.md) — 三类失败模式、四条解决路线、`DMA_BUF_IOCTL_SYNC` 方向语义、现有隐患与零拷贝方向
-- [RTMP 推流与 WSL 预览环境](docs/RTMP推流与WSL预览环境.md) — 板端 rkCam 推流、MediaMTX/WSL 服务、Windows 1935 端口转发、PyQt 预览与 conda 隔离环境
+- [RTMP 推流实现](docs/RTMP推流实现.md) — H.264 Annex-B/AVCC、avcC、FLV/RTMP，u_ffmpeg 各函数设计、重连与内存生命周期
+- [RTMP 预览操作](docs/RTMP预览操作.md) — WSL MediaMTX 服务、Windows 1935 端口转发、PyQt 预览与 conda 隔离环境
+- [帧率与延迟统计](docs/帧率与延迟统计.md) — 板端 1 Hz 统计、延迟口径与采样点、预览端解码/显示 fps 的读法
 
 ## 关于仓库内容
 

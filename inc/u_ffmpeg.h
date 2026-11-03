@@ -34,6 +34,7 @@ typedef struct {
     int64_t  last_dts_ms;          /* 上次发送的 dts，保证单调 */
     unsigned long long frames;     /* 已发送帧数 */
     unsigned long long dropped;    /* 丢帧数 */
+    unsigned long long bytes;      /* 已发送码流字节数（不含 FLV 封装开销） */
 } u_ffmpeg_t;
 
 /*

@@ -4,6 +4,8 @@ PyQt 视频预览小工具：在 PC 上查看 RK3568 推上来的 RTMP 流，或
 
 RTMP 服务端在 WSL 里的启动方式见 [../rtmp_server/README.md](../rtmp_server/README.md)。
 
+完整环境与操作步骤见 [../../docs/RTMP预览操作.md](../../docs/RTMP预览操作.md)。
+
 ## 已装好的 WSL 环境
 
 本机 WSL（Ubuntu 20.04）已经用 Miniforge 建好独立环境，**没有修改系统 Python，也没有改 `~/.bashrc`**：
@@ -65,4 +67,5 @@ python scripts/rtmp_preview/preview_rtmp.py
 - 直播流断开后每 2 秒自动重连；点“停止”结束预览。
 - 解码依赖 OpenCV 的 FFmpeg 后端，`opencv-python` 预编译包通常已带 RTMP。
 - 如果 OpenCV 打不开 RTMP，可以先用 `ffplay rtmp://...` 确认流本身正常。
+- 状态栏实时显示解码 fps / 显示 fps，终端每秒打印一行 `[preview] decode=... display=...`。
 - 预览只解码显示，不落盘。

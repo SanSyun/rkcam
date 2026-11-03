@@ -160,6 +160,7 @@ void *thread_encode(void *arg)
         }
 
         p->encoded++;
+        pipeline_stats_on_encode(&p->stats, pts_us);
     }
 
     /* 排空 rb_frame 后发 EOS，把编码器内部缓存的帧也吐到 packet_rb */

@@ -419,6 +419,7 @@ int u_ffmpeg_mux(u_ffmpeg_t *ff, const void *data, size_t len,
     ff->wait_key = 0;
     ff->last_dts_ms = dts_ms;
     ff->frames++;
+    ff->bytes += (unsigned long long)o;
     return 1;
 }
 
@@ -437,9 +438,10 @@ void u_ffmpeg_deinit(u_ffmpeg_t *ff)
     ff->extradata_len = 0;
 
     if (ff->configured) {
-        fprintf(stderr, "[rtmp] done, sent=%llu dropped=%llu\n",
+        fprintf(stderr, "[rtmp] done, sent=%llu dropped=%llu bytes=%llu\n",
                 (unsigned long long)ff->frames,
-                (unsigned long long)ff->dropped);
+                (unsigned long long)ff->dropped,
+                (unsigned long long)ff->bytes);
     }
     ff->configured = 0;
 

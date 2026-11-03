@@ -39,10 +39,83 @@ static void usage(const char *prog)
 {
     fprintf(stderr,
             "usage:\n"
-            "  %s -o <rtmp_url>        push H.264 to RTMP\n"
-            "  %s -r <output.h264>     record H.264 to file\n"
-            "exactly one of -o/-r is required; run until SIGINT/SIGTERM\n",
-            prog, prog);
+            "  %s -o <rtmp_url>                 push H.264 to RTMP\n"
+            "  %s -r <output.h264>              record H.264 to file\n"
+            "  %s -or <rtmp_url> <output.h264>  push and record together\n"
+            "\n"
+            "-o and -r may be given together (same as -or); at least one sink\n"
+            "is required. Runs until SIGINT/SIGTERM.\n"
+            "stats: one [stats] line per second on stderr, latency summary at exit\n",
+            prog, prog, prog);
+}
+
+/*
+ * 手写参数解析，不能用 getopt：
+ * getopt 会把 "-or url path" 拆成 -o 的参数 "r"，剩下两个变成非法位置参数。
+ * 返回 0 继续，1 已打印帮助，-1 参数错误。
+ */
+static int parse_args(int argc, char *argv[], const char **rtmp_url,
+                      const char **record_path)
+{
+    int i;
+
+    for (i = 1; i < argc; i++) {
+        const char *arg = argv[i];
+
+        if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
+            usage(argv[0]);
+            return 1;
+        }
+
+        if (strcmp(arg, "-o") == 0 || strcmp(arg, "-or") == 0) {
+            int both = (strcmp(arg, "-or") == 0);
+            int need = both ? 2 : 1;
+
+            if (i + need >= argc) {
+                fprintf(stderr, "%s needs %s\n", arg,
+                        both ? "<rtmp_url> <output.h264>" : "<rtmp_url>");
+                usage(argv[0]);
+                return -1;
+            }
+            if (*rtmp_url != NULL) {
+                fprintf(stderr,
+                        "duplicate push url (use only one of -o / -or)\n");
+                return -1;
+            }
+            if (both && *record_path != NULL) {
+                fprintf(stderr,
+                        "duplicate record path (use only one of -r / -or)\n");
+                return -1;
+            }
+
+            *rtmp_url = argv[++i];
+            if (both) {
+                *record_path = argv[++i];
+            }
+            continue;
+        }
+
+        if (strcmp(arg, "-r") == 0) {
+            if (i + 1 >= argc) {
+                fprintf(stderr, "-r needs <output.h264>\n");
+                usage(argv[0]);
+                return -1;
+            }
+            if (*record_path != NULL) {
+                fprintf(stderr,
+                        "duplicate record path (use only one of -r / -or)\n");
+                return -1;
+            }
+            *record_path = argv[++i];
+            continue;
+        }
+
+        fprintf(stderr, "unknown argument: %s\n", arg);
+        usage(argv[0]);
+        return -1;
+    }
+
+    return 0;
 }
 
 int main(int argc, char *argv[])
@@ -62,34 +135,18 @@ int main(int argc, char *argv[])
     int enc_ok = 0;
     int stream_ok = 0;
     int fps = 30;
-    int opt;
+    int pr;
     int n;
 
-    while ((opt = getopt(argc, argv, "o:r:h")) != -1) {
-        switch (opt) {
-        case 'o':
-            rtmp_url = optarg;
-            break;
-        case 'r':
-            record_path = optarg;
-            break;
-        case 'h':
-            usage(argv[0]);
-            return 0;
-        default:
-            usage(argv[0]);
-            return 1;
-        }
+    pr = parse_args(argc, argv, &rtmp_url, &record_path);
+    if (pr != 0) {
+        return (pr > 0) ? 0 : 1;
     }
 
-    if (optind < argc) {
-        fprintf(stderr, "unexpected argument: %s\n", argv[optind]);
-        usage(argv[0]);
-        return 1;
-    }
-    if ((rtmp_url == NULL) == (record_path == NULL)) {
+    if (rtmp_url == NULL && record_path == NULL) {
         fprintf(stderr,
-                "exactly one of -o <rtmp_url> or -r <output.h264> is required\n");
+                "at least one of -o <rtmp_url>, -r <output.h264>, "
+                "-or <rtmp_url> <output.h264> is required\n");
         usage(argv[0]);
         return 1;
     }
@@ -107,6 +164,7 @@ int main(int argc, char *argv[])
     p.width = ENC_WIDTH;
     p.height = ENC_HEIGHT;
     p.fps = fps;
+    pipeline_stats_init(&p.stats);
 
     if (record_path != NULL) {
         n = snprintf(p.output_path, sizeof(p.output_path), "%s", record_path);
@@ -121,7 +179,9 @@ int main(int argc, char *argv[])
     signal(SIGINT, on_signal);
     signal(SIGTERM, on_signal);
 
-    printf("fps=%d output=%s rtmp=%s (run until SIGINT/SIGTERM)\n",
+    printf("mode=%s fps=%d output=%s rtmp=%s (run until SIGINT/SIGTERM)\n",
+           (rtmp_url != NULL && record_path != NULL) ? "push+record" :
+           ((rtmp_url != NULL) ? "push" : "record"),
            fps,
            (p.output_path[0] != '\0') ? p.output_path : "(disabled)",
            (rtmp_url != NULL) ? rtmp_url : "(disabled)");
@@ -221,6 +281,14 @@ cleanup:
             pthread_join(tid_con, NULL);
             con_started = 0;
         }
+    }
+
+    /* 所有线程已退出：先出统计汇总，再关 RTMP（deinit 会清 configured） */
+    {
+        pipeline_stats_counters_t sc;
+
+        pipeline_collect_stats(&p, &sc);
+        pipeline_stats_summary(&p.stats, &sc);
     }
 
     /* 所有线程已退出，安全关闭 RTMP 并写 trailer */
